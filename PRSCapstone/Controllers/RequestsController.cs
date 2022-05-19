@@ -1,52 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRSCapstone.Models;
 
-namespace PRSCapstone.Controllers
-{
+namespace PRSCapstone.Controllers {
     [Route("api/[controller]")]
     [ApiController]
-    public class RequestsController : ControllerBase
-    {
+    public class RequestsController : ControllerBase {
         private readonly AppDbContext _context;
         private const string review = "REVIEW";
         private const string approve = "APPROVED";
         private const string reject = "REJECTED";
 
-        public RequestsController(AppDbContext context)
-        {
+        public RequestsController(AppDbContext context) {
             _context = context;
         }
-        
-        
+
+
         // GET: api/Requests
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Request>>> GetRequests()
-        {
-          if (_context.Requests == null)
-          {
-              return NotFound();
-          }
+        public async Task<ActionResult<IEnumerable<Request>>> GetRequests() {
+            if (_context.Requests == null) {
+                return NotFound();
+            }
             return await _context.Requests.Include(x => x.User).ToListAsync();
         }
 
         // GET: api/Requests/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Request>> GetRequest(int id)
-        {
-          if (_context.Requests == null)
-          {
-              return NotFound();
-          }
+        public async Task<ActionResult<Request>> GetRequest(int id) {
+            if (_context.Requests == null) {
+                return NotFound();
+            }
             var request = await _context.Requests.Include(x => x.User).Include(x => x.Requestlines).ThenInclude(x => x.Product).SingleOrDefaultAsync(x => x.Id == id);
 
-            if (request == null)
-            {
+            if (request == null) {
                 return NotFound();
             }
 
@@ -62,27 +49,21 @@ namespace PRSCapstone.Controllers
         // PUT: api/Requests/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRequest(int id, Request request)
-        {
-            if (id != request.Id)
-            {
+        public async Task<IActionResult> PutRequest(int id, Request request) {
+            if (id != request.Id) {
                 return BadRequest();
             }
 
             _context.Entry(request).State = EntityState.Modified;
 
-            try
-            {
+            try {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RequestExists(id))
-                {
+            catch (DbUpdateConcurrencyException) {
+                if (!RequestExists(id)) {
                     return NotFound();
                 }
-                else
-                {
+                else {
                     throw;
                 }
             }
@@ -92,7 +73,7 @@ namespace PRSCapstone.Controllers
         //REVIEW
         [HttpPut("review/{id}")]
         public async Task<IActionResult> Review(int id) {
-            var request =  _context.Requests.SingleOrDefault(x => x.Id == id);
+            var request = _context.Requests.SingleOrDefault(x => x.Id == id);
             if (request == null) { return NotFound(); }
             if (request.Total <= 50) { request.Status = approve; }
             else request.Status = review;
@@ -117,12 +98,10 @@ namespace PRSCapstone.Controllers
         // POST: api/Requests
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Request>> PostRequest(Request request)
-        {
-          if (_context.Requests == null)
-          {
-              return Problem("Entity set 'AppDbContext.Requests'  is null.");
-          }
+        public async Task<ActionResult<Request>> PostRequest(Request request) {
+            if (_context.Requests == null) {
+                return Problem("Entity set 'AppDbContext.Requests'  is null.");
+            }
             _context.Requests.Add(request);
             await _context.SaveChangesAsync();
 
@@ -131,15 +110,12 @@ namespace PRSCapstone.Controllers
 
         // DELETE: api/Requests/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRequest(int id)
-        {
-            if (_context.Requests == null)
-            {
+        public async Task<IActionResult> DeleteRequest(int id) {
+            if (_context.Requests == null) {
                 return NotFound();
             }
             var request = await _context.Requests.FindAsync(id);
-            if (request == null)
-            {
+            if (request == null) {
                 return NotFound();
             }
 
@@ -149,8 +125,7 @@ namespace PRSCapstone.Controllers
             return NoContent();
         }
 
-        private bool RequestExists(int id)
-        {
+        private bool RequestExists(int id) {
             return (_context.Requests?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
